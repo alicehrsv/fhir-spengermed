@@ -29,7 +29,7 @@ Alles allein im Zuge des Unterrichtes umgesetzt:
 - **Frontend:** Angular 19, TypeScript, Bootstrap 5, keycloak-angular
 - **Auth:** Keycloak 25 (Realm `spengermed`)
 
-![Systemarchitektur](docs/architecture.svg)
+![Systemarchitektur](doc/systemarchitektur_v2.svg)
 
 - **Infrastruktur:** Docker Compose, nginx, Maven
 
