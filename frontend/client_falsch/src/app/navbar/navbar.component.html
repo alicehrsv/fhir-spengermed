@@ -1,0 +1,75 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">Spengermed</a>
+
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent"
+    aria-expanded="false"
+    aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+    <!-- Linke Seite -->
+    <ul class="navbar-nav me-auto">
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/patients">Patienten</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/practitioners">Practitioner</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/encounters">Encounters</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/plf21s">PLF2_1</a>
+      </li>
+      <!-- Diesen Link in deine navbar.component.html nach den anderen Links hinzufügen: -->
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/medications">Medications</a>
+      </li>
+
+      <!-- UMÄNDERN!!! -->
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/medications">PLF1_1</a>
+      </li>
+      <!-- Add this to your navbar.component.html after the Medications link -->
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/observations">Observations</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/PLF5A22">PLF2_1</a>
+      </li>
+
+
+
+
+
+    </ul>
+
+    <!-- Rechte Seite -->
+    <ul class="navbar-nav ms-auto" *ngIf="isLoggedIn">
+
+      <li class="nav-item">
+        <span class="navbar-text text-black me-3">{{ username }}</span>
+      </li>
+
+      <li class="nav-item">
+        <button class="btn btn-outline-dark btn-sm" (click)="logout()">Logout</button>
+      </li>
+
+    </ul>
+
+  </div>
+</nav>

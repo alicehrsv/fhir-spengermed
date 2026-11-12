@@ -1,0 +1,20 @@
+
+<tr *ngFor="let manufactureditem of manufactureditemdefs">
+    <td>{{ manufactureditem.id }}</td>
+    <td>
+      <ul>
+        <li *ngFor="let id of manufactureditem.identifier">
+          {{ id.use }} – {{ id.value }}
+        </li>
+      </ul>
+    </td>
+    <td>{{ manufactureditem.status }}</td>
+    <td>{{ manufactureditem.manufacturedDoseForm.text }}</td>
+    <td>
+      <ul>
+        <li *ngFor="let prop of manufactureditem.property">
+          {{ prop.valueCodeableConcept.text || prop.valueDate || '—' }}
+        </li>
+      </ul>
+    </td>
+  </tr>

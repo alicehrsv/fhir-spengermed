@@ -1,0 +1,184 @@
+<div class="container p-3">
+
+  <h3 *ngIf="!medication.id">Neues Medikament</h3>
+  <h3 *ngIf="medication.id">Medikament bearbeiten (ID: {{ medication.id }})</h3>
+
+  <form (ngSubmit)="saveMedication()" *ngIf="medication">
+
+    <!-- CODE -->
+    <div class="mb-3">
+      <label class="form-label">Bezeichnung *</label>
+      <input type="text" class="form-control"
+             [(ngModel)]="medication.code.text" name="codeText" required />
+    </div>
+
+    <!-- STATUS -->
+    <div class="mb-3">
+      <label class="form-label">Status *</label>
+      <select class="form-select"
+              [(ngModel)]="medication.status" name="status" required>
+        <option *ngFor="let s of medicationStatuses" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <!-- FORM -->
+    <div class="mb-3">
+      <label class="form-label">Darreichungsform</label>
+      <input type="text" class="form-control"
+             [(ngModel)]="medication.form.text" name="formText" />
+    </div>
+
+    <!-- MANUFACTURER -->
+    <div class="mb-3">
+      <label class="form-label">Hersteller</label>
+      <input type="text" class="form-control mb-1"
+             [(ngModel)]="medication.manufacturer.display"
+             name="mfDisplay"
+             placeholder="Herstellername" />
+
+      <input type="text" class="form-control"
+             [(ngModel)]="medication.manufacturer.reference"
+             name="mfReference"
+             placeholder="Organization/xyz" />
+    </div>
+
+    <!-- AMOUNT -->
+    <div class="border rounded p-3 mb-3">
+      <h5>Dosierung</h5>
+
+      <div class="row mt-2">
+        <div class="col">
+          <label>Menge (Numerator)</label>
+          <input type="number" class="form-control"
+                 [(ngModel)]="medication.amount.numerator.value"
+                 name="numValue" min="0" />
+        </div>
+
+        <div class="col">
+          <label>Einheit</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="medication.amount.numerator.unit"
+                 name="numUnit" />
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col">
+          <label>pro (Denominator)</label>
+          <input type="number" class="form-control"
+                 [(ngModel)]="medication.amount.denominator.value"
+                 name="denValue" min="0" />
+        </div>
+
+        <div class="col">
+          <label>Einheit</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="medication.amount.denominator.unit"
+                 name="denUnit" />
+        </div>
+      </div>
+    </div>
+
+    <!-- IDENTIFIERS -->
+    <div class="border rounded p-3 mb-3">
+      <div class="d-flex justify-content-between">
+        <h5>Identifier</h5>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="addIdentifier()">+</button>
+      </div>
+
+      <div *ngFor="let id of medication.identifier; let i = index" class="row mt-2">
+        <div class="col">
+          <input type="text" class="form-control"
+                 placeholder="System"
+                 [(ngModel)]="id.system"
+                 name="idSystem{{ i }}" />
+        </div>
+        <div class="col">
+          <input type="text" class="form-control"
+                 placeholder="Wert"
+                 [(ngModel)]="id.value"
+                 name="idValue{{ i }}" />
+        </div>
+        <div class="col-1">
+          <button type="button" class="btn btn-danger"
+                  (click)="removeIdentifier(i)">x</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INGREDIENTS -->
+    <div class="border rounded p-3 mb-3">
+      <div class="d-flex justify-content-between">
+        <h5>Wirkstoffe</h5>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="addIngredient()">+</button>
+      </div>
+
+      <div *ngFor="let ing of medication.ingredient; let j = index"
+           class="mt-3 border p-2 rounded">
+
+        <input type="text" class="form-control mb-2"
+               placeholder="Name des Wirkstoffs"
+               [(ngModel)]="ing.itemCodeableConcept.text"
+               name="ingText{{ j }}" />
+
+        <div class="row">
+          <div class="col">
+            <label>Menge</label>
+            <input type="number" class="form-control"
+                   [(ngModel)]="ing.strength.numerator.value"
+                   name="ingNum{{ j }}" min="0" />
+          </div>
+          <div class="col">
+            <label>Einheit</label>
+            <input type="text" class="form-control"
+                   [(ngModel)]="ing.strength.numerator.unit"
+                   name="ingUnit{{ j }}" />
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col">
+            <label>pro</label>
+            <input type="number" class="form-control"
+                   [(ngModel)]="ing.strength.denominator.value"
+                   name="ingDen{{ j }}" min="0" />
+          </div>
+          <div class="col">
+            <label>Einheit</label>
+            <input type="text" class="form-control"
+                   [(ngModel)]="ing.strength.denominator.unit"
+                   name="ingDenUnit{{ j }}" />
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-danger mt-2"
+                (click)="removeIngredient(j)">Wirkstoff entfernen</button>
+      </div>
+    </div>
+
+    <!-- BATCH -->
+    <div class="border rounded p-3 mb-3">
+      <h5>Chargeninfo</h5>
+
+      <label>Chargennummer</label>
+      <input type="text" class="form-control mb-2"
+             [(ngModel)]="batchLotNumber"
+             name="lotNumber" />
+
+      <label>Ablaufdatum</label>
+      <input type="date" class="form-control"
+             [(ngModel)]="medication.batch.expirationDate"
+             name="expDate" />
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="d-flex gap-2 mt-4">
+      <button class="btn btn-success" type="submit" [disabled]="!isValid">Speichern</button>
+      <button class="btn btn-secondary" type="button" (click)="cancel()">Abbrechen</button>
+      <button *ngIf="medication.id" class="btn btn-danger" type="button" (click)="deleteMedication()">Löschen</button>
+    </div>
+
+  </form>
+</div>

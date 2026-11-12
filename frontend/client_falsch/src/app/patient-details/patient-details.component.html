@@ -1,0 +1,54 @@
+<div class="p-3 border rounded">
+  <h3>Patient bearbeiten</h3>
+
+  <!-- Name -->
+  <div *ngFor="let name of patient.name; let ni = index">
+    <div *ngFor="let prefix of name.prefix">
+      {{prefix}}
+    </div>
+
+    <div *ngIf="id">
+      <h3>Patient bearbeiten</h3>
+
+      <!-- Vorname -->
+      <label>Vorname:</label>
+      <div *ngFor="let name of patient.name; let i = index">
+        <input [(ngModel)]="name.given[0]" type="text" class="form-control mb-2">
+      </div>
+
+      <!-- Nachname -->
+      <label>Nachname:</label>
+      <input [(ngModel)]="patient.name[0].family" type="text" class="form-control mb-2">
+
+      <!-- Adresse -->
+      <label>Adresse:</label>
+      <div *ngFor="let adress of patient.adresses; let i = index">
+        <input [(ngModel)]="adress.line[0]" type="text" class="form-control mb-2">
+      </div>
+
+      <!-- Kontakt -->
+      <label>Kontakt:</label>
+      <div *ngFor="let t of patient.telecom; let i = index">
+        <input [(ngModel)]="t.value" type="text" class="form-control mb-2">
+      </div>
+
+      <!-- Geschlecht -->
+      <label>Geschlecht:</label>
+      <select [(ngModel)]="patient.gender" class="form-control mb-2">
+        <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+      </select>
+
+      <!-- Geburtstag -->
+      <label>Geburtsdatum:</label>
+      <input [(ngModel)]="patient.birthDate" type="date" class="form-control mb-2">
+
+      <!-- Button Fertig -->
+      <button (click)="savePatient()" class="btn btn-primary mt-2">Fertig bearbeitet</button>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-2">
+      <button (click)="savePatient()" class="btn btn-primary">Speichern</button>
+      <button (click)="deletePatient()" class="btn btn-danger">Löschen</button>
+    </div>
+  </div>

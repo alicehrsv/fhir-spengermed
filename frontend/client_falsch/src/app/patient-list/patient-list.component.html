@@ -1,0 +1,158 @@
+<!-- Patientenliste anzeigen-->
+<div class="Patientenliste">
+  <!-- Suchformular -->
+  <div class="search-form p-3 border rounded mb-3">
+    <h4>Patienten suchen</h4>
+
+    <div class="row">
+      <div class="col-md-4">
+        <label>Nachname:</label>
+        <input class="form-control" [(ngModel)]="searchParams.family" placeholder="z.B. Müller">
+      </div>
+      <div class="col-md-4">
+        <label>Vorname:</label>
+        <input class="form-control" [(ngModel)]="searchParams.given" placeholder="z.B. Anna">
+      </div>
+      <div class="col-md-4">
+        <label>Geschlecht:</label>
+        <select class="form-control" [(ngModel)]="searchParams.gender">
+          <option value="">Alle</option>
+          <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-4">
+        <label>Geburtsdatum:</label>
+        <input type="date" class="form-control" [(ngModel)]="searchParams.birthdate">
+      </div>
+      <div class="col-md-4">
+        <label>Adresse (Volltext):</label>
+        <input class="form-control" [(ngModel)]="searchParams.address" placeholder="z.B. Wien oder 1050">
+      </div>
+      <div class="col-md-4">
+        <label>Telefon/Email:</label>
+        <input class="form-control" [(ngModel)]="searchParams.telecom" placeholder="z.B. 555-1234">
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <button (click)="searchPatients()" class="btn btn-primary">Suchen</button>
+      <button (click)="resetSearch()" class="btn btn-secondary ms-2">Zurücksetzen</button>
+    </div>
+  </div>
+
+  <!-- Ergebnisanzahl -->
+  <div class="alert alert-info" *ngIf="total > 0">
+    Gefunden: {{ total }} Patient(en)
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Patienten-ID</th>
+      <th>Name</th>
+      <th>Geschlecht</th>
+      <th>Geburtsdatum</th>
+      <th>Adresse</th>
+      <th>Kontakt</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let patient of patients" (click)="selectPatient(patient)">
+      <td>{{ patient.id }}</td>
+      <td>
+        <div *ngFor="let name of patient.name">
+          {{ name.given }} {{ name.family }}
+        </div>
+      </td>
+      <td>{{ patient.gender }}</td>
+      <td>{{ patient.birthDate | date }}</td>
+      <td>
+        <div *ngFor="let adress of patient.adresses">
+          <div *ngFor="let line of adress.line">
+            {{ line }}<br>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div *ngFor="let telecom of patient.telecom">
+          {{ telecom.system }} - {{ telecom.value }}<br>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <div class="pagination-controls d-flex justify-content-between align-items-center mt-3 p-3 border rounded">
+    <div>
+      Zeige {{ (searchParams._page - 1) * searchParams._count + 1 }} -
+      {{ Math.min(searchParams._page * searchParams._count, total) }}
+      von {{ total }} Ergebnissen
+    </div>
+
+    <div>
+      <label>Einträge pro Seite:</label>
+      <select [(ngModel)]="searchParams._count" (change)="searchPatients()" class="form-control d-inline w-auto ms-2">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+
+    <div>
+      <button (click)="prevPage()" [disabled]="searchParams._page === 1" class="btn btn-secondary">
+        ← Zurück
+      </button>
+      <span class="mx-3">Seite {{ searchParams._page }}</span>
+      <button (click)="nextPage()" [disabled]="searchParams._page * searchParams._count >= total" class="btn btn-secondary">
+        Weiter →
+      </button>
+    </div>
+  </div>
+
+  <!-- Details vom ausgewählten Patienten -->
+  <div *ngIf="selectedPatient.id != ''">
+    <app-patient-details
+      [id]="selectedPatient.id"
+      (patientModified)="onpatientModified($event)">
+    </app-patient-details>
+  </div>
+
+  <!-- Button zum Öffnen des Formulars -->
+  <button (click)="toggleAddForm()" class="btn btn-success mt-3">Hinzufügen</button>
+
+  <!-- Formular für neuen Patienten -->
+  <div *ngIf="showAddForm" class="p-3 border rounded mt-3">
+    <h3>Neuen Patienten hinzufügen</h3>
+
+    <label>Vorname:</label>
+    <input type="text" [(ngModel)]="selectedPatient.name[0].given[0]" class="form-control">
+
+    <label>Nachname:</label>
+    <input type="text" [(ngModel)]="selectedPatient.name[0].family" class="form-control">
+
+    <label>Geschlecht:</label>
+    <select [(ngModel)]="selectedPatient.gender" class="form-control">
+      <option *ngFor="let gender of genders" [value]="gender">{{ gender }}</option>
+    </select>
+
+    <label>Geburtsdatum:</label>
+    <input type="date" [(ngModel)]="selectedPatient.birthDate" class="form-control">
+
+    <label>Adresse:</label>
+    <input type="text" [(ngModel)]="selectedPatient.adresses[0].line[0]" class="form-control">
+
+    <label>Kontakt (Telefon):</label>
+    <input type="text" [(ngModel)]="selectedPatient.telecom[0].value" class="form-control">
+
+    <div class="mt-2">
+      <button (click)="addPatient()" class="btn btn-primary">Speichern</button>
+      <button (click)="toggleAddForm()" class="btn btn-secondary">Abbrechen</button>
+    </div>
+  </div>
+
+</div>

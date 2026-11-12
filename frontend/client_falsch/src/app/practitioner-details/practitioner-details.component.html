@@ -1,0 +1,122 @@
+<form #f="ngForm" class="card" style="padding:1rem">
+
+  <h3 *ngIf="practitioner.id; else neu">Bearbeiten – {{ practitioner.id }}</h3>
+  <ng-template #neu>
+    <h3>Neuer Practitioner</h3>
+  </ng-template>
+
+  <!-- Name -->
+  <div>
+    <label><strong>Name</strong></label>
+    <div *ngFor="let name of practitioner.name; let ni = index; trackBy: trackByIndex" class="box">
+      <label>Prefix:</label>
+      <input type="text" [(ngModel)]="name.prefix[0]" [ngModelOptions]="{standalone:true}"
+             placeholder="Dr., Prof., ...">
+
+      <label>Vorname:</label>
+      <div *ngFor="let given of name.given; let gi = index; trackBy: trackByIndex">
+        <input type="text" [(ngModel)]="name.given[gi]" [ngModelOptions]="{standalone:true}" required>
+      </div>
+      <button type="button" (click)="addGiven(name)">+ Vorname</button>
+
+      <label>Nachname:</label>
+      <input type="text" [(ngModel)]="name.family" [ngModelOptions]="{standalone:true}">
+
+      <label>Suffix:</label>
+      <input type="text" [(ngModel)]="name.suffix[0]" [ngModelOptions]="{standalone:true}">
+    </div>
+    <button type="button" (click)="addName()">+ Name hinzufügen</button>
+  </div>
+
+  <!-- Geschlecht -->
+  <div>
+    <label><strong>Geschlecht</strong></label>
+    <select [(ngModel)]="practitioner.gender" name="gender" required>
+      <option [ngValue]="undefined">— bitte wählen —</option>
+      <option *ngFor="let g of genders" [ngValue]="g">{{ g }}</option>
+    </select>
+  </div>
+
+  <!-- Geburtstag -->
+  <div>
+    <label><strong>Geburtstag</strong></label>
+    <input type="date" [(ngModel)]="practitioner.birthDate" name="birthDate" required>
+  </div>
+
+  <!-- Adressen -->
+  <div>
+    <label><strong>Adresse(n)</strong></label>
+    <div *ngFor="let a of practitioner.address; let i = index; trackBy: trackByIndex" class="box">
+      <div *ngFor="let line of a.line; let j = index; trackBy: trackByIndex">
+        <input type="text" [(ngModel)]="a.line[j]" [ngModelOptions]="{standalone:true}" placeholder="Adresszeile">
+      </div>
+      <button type="button" (click)="addLine(a)">+ Zeile</button>
+      <input type="text" [(ngModel)]="a.postalCode" [ngModelOptions]="{standalone:true}" placeholder="PLZ">
+      <input type="text" [(ngModel)]="a.city" [ngModelOptions]="{standalone:true}" placeholder="Stadt">
+      <input type="text" [(ngModel)]="a.state" [ngModelOptions]="{standalone:true}" placeholder="Bundesland">
+      <input type="text" [(ngModel)]="a.country" [ngModelOptions]="{standalone:true}" placeholder="Land">
+    </div>
+    <button type="button" (click)="addAdresse()">+ Adresse hinzufügen</button>
+  </div>
+
+  <!-- Kontakt -->
+  <div>
+    <label><strong>Kontakt</strong></label>
+    <div *ngFor="let t of practitioner.telecom; let i = index; trackBy: trackByIndex" class="box">
+      <select [(ngModel)]="t.system" [ngModelOptions]="{standalone:true}">
+        <option value="phone">phone</option>
+        <option value="email">email</option>
+        <option value="fax">fax</option>
+        <option value="url">url</option>
+      </select>
+      <input type="text" [(ngModel)]="t.value" [ngModelOptions]="{standalone:true}" placeholder="Wert">
+    </div>
+    <button type="button" (click)="addTelecom()">+ Kontakt</button>
+  </div>
+
+  <!-- Foto -->
+  <div>
+    <label><strong>Attachments (Foto)</strong></label>
+    <div *ngFor="let p of practitioner.photo; let i = index; trackBy: trackByIndex" class="box">
+      <input type="text" [(ngModel)]="p.contentType" [ngModelOptions]="{standalone:true}" placeholder="image/jpeg">
+      <input type="text" [(ngModel)]="p.url" [ngModelOptions]="{standalone:true}" placeholder="https://...">
+    </div>
+    <button type="button" (click)="addPhoto()">+ Foto</button>
+  </div>
+
+  <!-- Qualifikationen -->
+  <div>
+    <label><strong>Qualifikationen</strong></label>
+    <div *ngFor="let q of practitioner.qualification; let qi = index; trackBy: trackByIndex" class="box">
+      <div *ngFor="let id of q.identifier; let ii = index; trackBy: trackByIndex">
+        <input type="text" [(ngModel)]="id.system" [ngModelOptions]="{standalone:true}" placeholder="System">
+        <input type="text" [(ngModel)]="id.value" [ngModelOptions]="{standalone:true}" placeholder="Wert">
+      </div>
+      <button type="button" (click)="addQualificationIdentifier(q)">+ Identifier</button>
+      <div>
+        <input type="text" [(ngModel)]="q.code.text" [ngModelOptions]="{standalone:true}"
+               placeholder="Bezeichnung (z.B. Facharzt)">
+      </div>
+    </div>
+    <button type="button" (click)="addQualification()">+ Qualifikation</button>
+  </div>
+
+  <!-- Kommunikation -->
+  <div>
+    <label><strong>Kommunikationen</strong></label>
+    <div *ngFor="let c of practitioner.communication; let ci = index; trackBy: trackByIndex" class="box">
+      <input type="text" [(ngModel)]="c.text" [ngModelOptions]="{standalone:true}" placeholder="z.B. Deutsch, Englisch">
+    </div>
+    <button type="button" (click)="addCommunication()">+ Kommunikation</button>
+  </div>
+
+  <div style="margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap">
+    <button type="button" (click)="save()" [disabled]="!isValid">Speichern</button>
+    <button type="button" (click)="cancel()">Abbrechen</button>
+    <button type="button" (click)="delete()" *ngIf="practitioner.id">Löschen</button>
+  </div>
+
+  <div *ngIf="!isValid" style="margin-top:.5rem; color:#b33">
+    Bitte mindestens Vor- oder Nachname, Geschlecht und Geburtstag angeben.
+  </div>
+</form>

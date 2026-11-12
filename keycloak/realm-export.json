@@ -1,0 +1,113 @@
+{
+  "realm": "spengermed",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "frontend",
+      "name": "Angular Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "rootUrl": "https://localhost",
+      "baseUrl": "https://localhost/",
+      "redirectUris": [
+        "https://localhost/*",
+        "https://localhost/",
+        "http://localhost/*",
+        "http://localhost/",
+        "http://localhost:4200/*",
+        "http://localhost:80/*"
+      ],
+      "webOrigins": [
+        "https://localhost",
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:4200",
+        "*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true
+    },
+    {
+    "clientId": "backend",
+    "name": "Backend Service",
+    "enabled": true,
+    "secret": "my-secret-12345",
+    "publicClient": false,
+    "protocol": "openid-connect",
+    "serviceAccountsEnabled": true,
+    "standardFlowEnabled": false,
+    "directAccessGrantsEnabled": false,
+    "authorizationServicesEnabled": false,
+    "fullScopeAllowed": true
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "composite": false,
+        "clientRole": false,
+        "description": "Regular user role"
+      },
+      {
+        "name": "admin",
+        "composite": false,
+        "clientRole": false,
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "test",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "test@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"],
+      "clientRoles": {}
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@example.com",
+      "firstName": "Admin",
+      "lastName": "Administrator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "admin"],
+      "clientRoles": {}
+    }
+  ],
+  "defaultRoles": ["user"]
+}

@@ -1,0 +1,111 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="jumbotron bg-primary text-white text-center mb-4">
+        <h1 class="display-4">🏥 Willkommen bei Spengermed</h1>
+        <p class="lead">FHIR-basiertes Krankenhausinformationssystem</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentifizierungsstatus -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card" [ngClass]="keycloakService.isLoggedIn() ? 'border-success' : 'border-warning'">
+        <div class="card-header" [ngClass]="keycloakService.isLoggedIn() ? 'bg-success text-white' : 'bg-warning'">
+          <h5 class="mb-0">
+            <span *ngIf="keycloakService.isLoggedIn()">✅ Erfolgreich angemeldet</span>
+            <span *ngIf="!keycloakService.isLoggedIn()">⚠️ Nicht angemeldet</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="keycloakService.isLoggedIn()">
+            <p><strong>Token verfügbar:</strong> {{ hasToken ? 'Ja' : 'Nein' }}</p>
+          </div>
+          <div *ngIf="!keycloakService.isLoggedIn()">
+            <p>Sie sind nicht angemeldet. Bitte melden Sie sich an, um auf die Anwendung zuzugreifen.</p>
+            <button class="btn btn-primary" (click)="keycloakService.login()">Jetzt anmelden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API-Test Bereich (nur wenn angemeldet) -->
+  <div *ngIf="keycloakService.isLoggedIn()" class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">🔌 API-Verbindungstest</h5>
+        </div>
+        <div class="card-body">
+          <p>Testen Sie die Verbindung zu Ihrem Backend:</p>
+
+          <button
+            class="btn btn-info"
+            (click)="loadPatients()"
+            [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2"></span>
+            {{ loading ? 'Lädt...' : 'Patienten laden' }}
+          </button>
+
+          <!-- Fehler-Anzeige -->
+          <div *ngIf="error" class="alert alert-danger mt-3">
+            <strong>❌ Fehler:</strong> {{ error }}
+          </div>
+
+          <!-- Erfolgs-Anzeige -->
+          <div *ngIf="!loading && !error && patients.length > 0" class="alert alert-success mt-3">
+            <strong>✅ Erfolgreich!</strong> {{ patients.length }} Patienten geladen.
+            <ul class="mt-2 mb-0">
+              <li *ngFor="let patient of patients.slice(0, 3)">
+                {{ patient.name?.[0]?.given?.join(' ') || 'Unbekannt' }}
+                {{ patient.name?.[0]?.family || '' }}
+                (ID: {{ patient.id }})
+              </li>
+              <li *ngIf="patients.length > 3">
+                ... und {{ patients.length - 3 }} weitere
+              </li>
+            </ul>
+          </div>
+
+          <!-- Keine Daten -->
+          <div *ngIf="!loading && !error && patients.length === 0" class="alert alert-info mt-3">
+            <strong>ℹ️ Info:</strong> Keine Patienten gefunden oder noch nicht geladen.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links (nur wenn angemeldet) -->
+  <div *ngIf="keycloakService.isLoggedIn()" class="row mt-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">👥 Patienten</h5>
+          <p class="card-text">Verwalten Sie Patientendaten</p>
+          <a routerLink="/patients" class="btn btn-primary">Zu den Patienten</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">👩‍⚕️ Practitioner</h5>
+          <p class="card-text">Verwalten Sie Arztdaten</p>
+          <a routerLink="/practitioners" class="btn btn-primary">Zu den Ärzten</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">📋 Encounters</h5>
+          <p class="card-text">Verwalten Sie Behandlungen</p>
+          <a routerLink="/encounters" class="btn btn-primary">Zu den Behandlungen</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

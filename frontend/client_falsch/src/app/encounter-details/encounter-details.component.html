@@ -1,0 +1,51 @@
+<form class="card" style="padding:1rem">
+	<h3 *ngIf="encounter.id; else neu">Bearbeiten – {{ encounter.id }}</h3>
+	<ng-template #neu>
+		<h3>Neues Encounter</h3>
+	</ng-template>
+
+	<div>
+		<label>Status</label>
+		<select [(ngModel)]="encounter.status" name="status" required>
+			<option value="">-- bitte wählen --</option>
+			<option value="planned">planned</option>
+			<option value="in-progress">in-progress</option>
+			<option value="on-hold">on-hold</option>
+			<option value="discharged">discharged</option>
+			<option value="completed">completed</option>
+			<option value="cancelled">cancelled</option>
+			<option value="discontinued">discontinued</option>
+			<option value="entered-in-error">entered-in-error</option>
+			<option value="unknown">unknown</option>
+		</select>
+	</div>
+
+	<div>
+		<label>Subject (Patient-Reference)</label>
+		<input type="text" [(ngModel)]="subjectReference" name="subject" required>
+	</div>
+
+	<div>
+		<label>Start</label>
+		<input type="datetime-local" [(ngModel)]="participantPeriodStart" name="start">
+	</div>
+
+	<div>
+		<label>Ende</label>
+		<input type="datetime-local" [(ngModel)]="participantPeriodEnd" name="end">
+	</div>
+
+	<div>
+		<label>Teilnehmer (Actor-Reference)</label>
+		<input type="text" [(ngModel)]="participantActorReference" name="actor">
+	</div>
+
+	<div style="margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap">
+		<button type="button" (click)="save()" [disabled]="!isValid">Speichern</button>
+		<button type="button" (click)="cancel()">Abbrechen</button>
+	</div>
+
+	<div *ngIf="!isValid" style="margin-top:.5rem; color:#b33">
+		Bitte Status, Subject und mindestens einen Teilnehmer angeben.
+	</div>
+</form>

@@ -1,0 +1,15 @@
+{
+  "id": "e11",
+  "en": [{
+    "f": "https://e11",
+    "r": {
+      "resourceTye": "Medication",
+      "id": "example",
+      "text": {
+        "status": "generated",
+        "div": "<di>e11res</div>"
+      }
+      }
+    }],
+  "top": "searchset"}
+

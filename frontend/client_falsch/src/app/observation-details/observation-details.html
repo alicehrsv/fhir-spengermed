@@ -1,0 +1,251 @@
+<div class="observation-details p-3 border rounded">
+  <h3>Observation bearbeiten</h3>
+
+  <div *ngIf="observation">
+    <!-- Basic Information -->
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label><strong>ID:</strong></label>
+        <p>{{ observation.id }}</p>
+      </div>
+
+      <div class="col-md-3">
+        <label>Status:</label>
+        <select [(ngModel)]="observation.status" class="form-control">
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label>Code/Typ:</label>
+        <input type="text"
+               [(ngModel)]="obsCode.text"
+               class="form-control"
+               placeholder="z.B. Creatinine, Blood Pressure">
+      </div>
+    </div>
+
+    <!-- Subject and Dates -->
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label>Patient (Referenz):</label>
+        <input type="text"
+               [(ngModel)]="obsSubject.reference"
+               class="form-control"
+               placeholder="Patient/123">
+      </div>
+
+      <div class="col-md-4">
+        <label>Patient (Display):</label>
+        <input type="text"
+               [(ngModel)]="obsSubject.display"
+               class="form-control"
+               placeholder="Name des Patienten">
+      </div>
+
+      <div class="col-md-4">
+        <label>Effektives Datum:</label>
+        <input type="datetime-local"
+               [ngModel]="formatDateForInput(observation.effectiveDateTime)"
+               (ngModelChange)="observation.effectiveDateTime = parseDate($event)"
+               class="form-control">
+      </div>
+    </div>
+
+    <!-- Value Section -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5>Wert</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label>Wert Typ:</label>
+            <select [(ngModel)]="valueType" (change)="onValueTypeChange()" class="form-control">
+              <option value="">Kein Wert</option>
+              <option value="quantity">Menge (Quantity)</option>
+              <option value="string">Text (String)</option>
+              <option value="boolean">Boolean</option>
+              <option value="integer">Integer</option>
+              <option value="codeableConcept">CodeableConcept</option>
+            </select>
+          </div>
+
+          <!-- Quantity Value -->
+          <div *ngIf="valueType === 'quantity'" class="col-md-9">
+            <div class="row">
+              <div class="col-md-4">
+                <label>Wert:</label>
+                <input type="number"
+                       [(ngModel)]="obsValueQuantity.value"
+                       class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label>Einheit:</label>
+                <input type="text"
+                       [(ngModel)]="obsValueQuantity.unit"
+                       class="form-control"
+                       placeholder="z.B. mg/dL, mm[Hg]">
+              </div>
+              <div class="col-md-4">
+                <label>UCUM Code:</label>
+                <input type="text"
+                       [(ngModel)]="obsValueQuantity.code"
+                       class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <!-- String Value -->
+          <div *ngIf="valueType === 'string'" class="col-md-9">
+            <label>Text Wert:</label>
+            <input type="text"
+                   [(ngModel)]="observation.valueString"
+                   class="form-control">
+          </div>
+
+          <!-- Boolean Value -->
+          <div *ngIf="valueType === 'boolean'" class="col-md-9">
+            <label>Boolean Wert:</label>
+            <select [(ngModel)]="observation.valueBoolean" class="form-control">
+              <option [value]="true">True</option>
+              <option [value]="false">False</option>
+            </select>
+          </div>
+
+          <!-- Integer Value -->
+          <div *ngIf="valueType === 'integer'" class="col-md-9">
+            <label>Integer Wert:</label>
+            <input type="number"
+                   [(ngModel)]="observation.valueInteger"
+                   class="form-control">
+          </div>
+
+          <!-- CodeableConcept Value -->
+          <div *ngIf="valueType === 'codeableConcept'" class="col-md-9">
+            <label>CodeableConcept Text:</label>
+            <input type="text"
+                   [(ngModel)]="obsValueCodeableConcept.text"
+                   class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference Range -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5>Referenzbereich</h5>
+      </div>
+      <div class="card-body">
+        <div *ngFor="let range of observation.referenceRange; let i = index" class="mb-2">
+          <div class="row">
+            <div class="col-md-3">
+              <label>Min-Wert:</label>
+              <input type="number"
+                     [(ngModel)]="getRangeLow(range).value"
+                     class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label>Max-Wert:</label>
+              <input type="number"
+                     [(ngModel)]="getRangeHigh(range).value"
+                     class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label>Einheit:</label>
+              <input type="text"
+                     [(ngModel)]="getRangeLow(range).unit"
+                     class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label>Text:</label>
+              <input type="text"
+                     [(ngModel)]="range.text"
+                     class="form-control">
+            </div>
+          </div>
+        </div>
+        <button (click)="addReferenceRange()" class="btn btn-sm btn-outline-primary mt-2">
+          + Referenzbereich hinzufügen
+        </button>
+      </div>
+    </div>
+
+    <!-- Components (e.g., for Blood Pressure) -->
+    <div class="card mb-3" *ngIf="observation.component && observation.component.length > 0">
+      <div class="card-header">
+        <h5>Komponenten</h5>
+      </div>
+      <div class="card-body">
+        <div *ngFor="let comp of observation.component; let i = index" class="mb-3 p-2 border rounded">
+          <h6>Komponente {{ i + 1 }}</h6>
+          <div class="row">
+            <div class="col-md-4">
+              <label>Code:</label>
+              <input type="text"
+                     [(ngModel)]="getCompCode(comp).text"
+                     class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label>Wert:</label>
+              <input type="number"
+                     [(ngModel)]="getCompValueQuantity(comp).value"
+                     class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label>Einheit:</label>
+              <input type="text"
+                     [(ngModel)]="getCompValueQuantity(comp).unit"
+                     class="form-control">
+            </div>
+          </div>
+        </div>
+        <button (click)="addComponent()" class="btn btn-sm btn-outline-primary mt-2">
+          + Komponente hinzufügen
+        </button>
+      </div>
+    </div>
+
+    <!-- Interpretation -->
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <label>Interpretation:</label>
+        <div *ngFor="let interp of observation.interpretation; let i = index" class="input-group mb-2">
+          <input type="text"
+                 [(ngModel)]="interp.text"
+                 class="form-control"
+                 placeholder="z.B. High, Normal, Low">
+          <button (click)="removeInterpretation(i)" class="btn btn-outline-danger">×</button>
+        </div>
+        <button (click)="addInterpretation()" class="btn btn-sm btn-outline-primary">
+          + Interpretation hinzufügen
+        </button>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <label>Notizen:</label>
+        <div *ngFor="let note of observation.note; let i = index" class="input-group mb-2">
+          <textarea [(ngModel)]="note.text"
+                    class="form-control"
+                    rows="2"
+                    placeholder="Notiz eingeben"></textarea>
+          <button (click)="removeNote(i)" class="btn btn-outline-danger">×</button>
+        </div>
+        <button (click)="addNote()" class="btn btn-sm btn-outline-primary">
+          + Notiz hinzufügen
+        </button>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-3">
+      <button (click)="saveObservation()" class="btn btn-primary">Speichern</button>
+      <button (click)="deleteObservation()" class="btn btn-danger ms-2">Löschen</button>
+      <button (click)="cancel()" class="btn btn-secondary ms-2">Abbrechen</button>
+    </div>
+  </div>
+</div>

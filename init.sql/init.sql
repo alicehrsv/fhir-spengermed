@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS spengerfhirmed;
+CREATE DATABASE IF NOT EXISTS keycloak;
+GRANT ALL PRIVILEGES ON keycloak.* TO 'root'@'%';

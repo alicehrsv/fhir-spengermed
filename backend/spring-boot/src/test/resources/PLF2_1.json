@@ -1,0 +1,12 @@
+{
+  "id": "example-sanar",
+  "st": "active",
+  "r": [{
+    "type": "permit",
+    "data": [{
+      "extension": {
+        "tL": "text/fhirpath"
+      }
+    }]
+  }]
+}

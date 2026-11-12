@@ -1,0 +1,33 @@
+<div class="encounter-list">
+  <h2>Encounter-Liste</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Status</th>
+      <th>Subject</th>
+      <th>Start</th>
+      <th>Ende</th>
+      <th>Aktion</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let enc of encounters" (click)="selectEncounter(enc)" style="cursor:pointer">
+      <td>{{ enc.id }}</td>
+      <td>{{ enc.status }}</td>
+      <td>{{ enc.subject?.reference }}</td>
+      <td>{{ enc.participant?.[0]?.period?.start || '—' }}</td>
+      <td>{{ enc.participant?.[0]?.period?.end || '—' }}</td>
+      <td>
+        <button (click)="$event.stopPropagation(); selectEncounter(enc)">Details</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <button (click)="addEncounter()">Neues Encounter</button>
+
+  <div *ngIf="selected" style="margin-top:1rem">
+    <app-encounter-details [encounter]="selected" (saved)="onSavedOrCanceled(true)"
+                           (canceled)="onSavedOrCanceled(false)"></app-encounter-details>
+  </div>
+</div>

@@ -1,0 +1,258 @@
+<!-- Medikamentenliste anzeigen -->
+<div class="container-fluid p-4">
+  <!-- Ladeanzeige -->
+  <div *ngIf="isLoading" class="text-center p-4">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Lädt...</span>
+    </div>
+    <p class="mt-2">Medikamente werden geladen...</p>
+  </div>
+
+  <!-- Fehlermeldung -->
+  <div *ngIf="errorMessage" class="alert alert-warning" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Hauptinhalt -->
+  <div *ngIf="!isLoading">
+    <h2 class="mb-4">Medikamentenliste ({{ total }} Medikamente)</h2>
+
+    <!-- Buttons -->
+    <div class="d-flex gap-2 mb-3">
+      <button (click)="toggleAddForm()" class="btn btn-success">
+        <i class="fas fa-plus me-2"></i>Neues Medikament hinzufügen
+      </button>
+      <button (click)="clearAllMedications()" class="btn btn-outline-danger" *ngIf="medications.length > 0">
+        <i class="fas fa-trash-alt me-2"></i>Alle Medikamente löschen
+      </button>
+    </div>
+
+    <!-- Pagination Controls (oben) -->
+    <div class="pagination-controls d-flex justify-content-between align-items-center mb-3 p-3 border rounded" *ngIf="total > 0">
+      <div>
+        Zeige {{ (searchParams._page - 1) * searchParams._count + 1 }} -
+        {{ Math.min(searchParams._page * searchParams._count, total) }}
+        von {{ total }} Ergebnissen
+      </div>
+
+      <div>
+        <label>Einträge pro Seite:</label>
+        <select [(ngModel)]="searchParams._count" (change)="searchMedications()" class="form-control d-inline w-auto ms-2">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+
+      <div>
+        <button (click)="prevPage()" [disabled]="searchParams._page === 1" class="btn btn-secondary">
+          ← Zurück
+        </button>
+        <span class="mx-3">Seite {{ searchParams._page }}</span>
+        <button (click)="nextPage()" [disabled]="searchParams._page * searchParams._count >= total" class="btn btn-secondary">
+          Weiter →
+        </button>
+      </div>
+    </div>
+
+    <!-- Keine Medikamente -->
+    <div *ngIf="medications.length === 0" class="alert alert-info">
+      Keine Medikamente gefunden. Klicken Sie auf "Neues Medikament hinzufügen" um zu beginnen.
+    </div>
+
+    <!-- Medikamentenliste -->
+    <div *ngIf="medications.length > 0" class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Bezeichnung</th>
+          <th>Status</th>
+          <th>Darreichungsform</th>
+          <th>Hersteller</th>
+          <th>Wirkstoffe</th>
+          <th>Chargennummer</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let medication of medications; trackBy: trackByMedicationId"
+            (click)="selectMedication(medication)"
+            style="cursor: pointer">
+          <td><strong>{{ medication.id || 'N/A' }}</strong></td>
+          <td>{{ medication.code.text || 'Keine Bezeichnung' }}</td>
+          <td>
+            <span class="badge bg-{{ getStatusColor(medication.status) }}">
+              {{ getStatusLabel(medication.status) }}
+            </span>
+          </td>
+          <td>{{ medication.form && medication.form.text ? medication.form.text : 'Keine Form' }}</td>
+          <td>{{ medication.manufacturer.display || 'Kein Hersteller' }}</td>
+          <td>{{ medication.ingredient.length || 0 }} Wirkstoff(e)</td>
+          <td>
+            <span *ngIf="medication.batch.lotNumber.length > 0">
+              {{ medication.batch.lotNumber[0] }}
+              <small *ngIf="medication.batch.lotNumber.length > 1" class="text-muted">
+                (+{{ medication.batch.lotNumber.length - 1 }})
+              </small>
+            </span>
+            <em *ngIf="!medication.batch.lotNumber.length" class="text-muted">Keine Charge</em>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Formular -->
+    <div *ngIf="showAddForm" class="card mt-4">
+      <div class="card-header">
+        <h4>{{ isEditMode ? 'Medikament bearbeiten' : 'Neues Medikament hinzufügen' }}</h4>
+      </div>
+
+      <div class="card-body">
+        <!-- Bezeichnung -->
+        <div class="mb-3">
+          <label class="form-label">Bezeichnung:</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="selectedMedication.code.text"
+            placeholder="Medikamentenbezeichnung eingeben"
+          />
+        </div>
+
+        <!-- Status & Form -->
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label">Status:</label>
+            <select [(ngModel)]="selectedMedication.status" class="form-select">
+              <option value="">Status wählen</option>
+              <option *ngFor="let status of medicationStatuses" [value]="status">
+                {{ getStatusLabel(status) }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Darreichungsform:</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="selectedMedication.form.text"
+              placeholder="z.B. Tablette, Kapsel, Sirup"
+            />
+          </div>
+        </div>
+
+        <!-- Hersteller -->
+        <div class="mt-3">
+          <label class="form-label">Hersteller:</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="selectedMedication.manufacturer.display"
+            placeholder="Herstellername eingeben"
+          />
+        </div>
+
+        <!-- DOSIERUNG (Amount / Ratio) -->
+        <div class="mt-4 border rounded p-3">
+          <h5>Dosierung (Amount)</h5>
+
+          <div class="row mt-2">
+            <!-- Numerator -->
+            <div class="col-md-6">
+              <label class="form-label">Wirkstoffmenge (Numerator):</label>
+
+              <div class="input-group mb-2">
+                <span class="input-group-text">Wert</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="selectedMedication.amount.numerator.value"
+                  placeholder="z.B. 500"
+                />
+              </div>
+
+              <div class="input-group">
+                <span class="input-group-text">Einheit</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="selectedMedication.amount.numerator.unit"
+                  placeholder="mg, ml ..."
+                />
+              </div>
+            </div>
+
+            <!-- Denominator -->
+            <div class="col-md-6">
+              <label class="form-label">Bezugseinheit (Denominator):</label>
+
+              <div class="input-group mb-2">
+                <span class="input-group-text">Wert</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="selectedMedication.amount.denominator.value"
+                  placeholder="z.B. 1"
+                />
+              </div>
+
+              <div class="input-group">
+                <span class="input-group-text">Einheit</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="selectedMedication.amount.denominator.unit"
+                  placeholder="Tablette, Stück ..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charge -->
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <label class="form-label">Chargennummer:</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="selectedMedication.batch.lotNumber[0]"
+              placeholder="Chargennummer eingeben"
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Ablaufdatum:</label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="selectedMedication.batch.expirationDate"
+            />
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="mt-4 d-flex gap-2">
+          <button (click)="saveMedication()" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>{{ isEditMode ? 'Aktualisieren' : 'Speichern' }}
+          </button>
+          <button (click)="cancelEdit()" class="btn btn-secondary">
+            <i class="fas fa-times me-2"></i>Abbrechen
+          </button>
+          <button *ngIf="isEditMode" (click)="deleteCurrentMedication()" class="btn btn-danger">
+            <i class="fas fa-trash me-2"></i>Löschen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div *ngIf="selectedMedicationId && !showAddForm" class="mt-4">
+      <app-medication-details
+        [id]="selectedMedicationId"
+        (medicationModified)="onMedicationModified($event)">
+      </app-medication-details>
+    </div>
+  </div>
+</div>
